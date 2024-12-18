@@ -1,0 +1,214 @@
+﻿@page "/hash"
+@using Microsoft.AspNetCore.Components.Routing
+@inject NavigationManager navigationManager
+<style>
+	body {
+		font-family: Arial, sans-serif;
+		margin: 0;
+		padding: 0;
+	}
+
+	.content {
+		margin: 20px;
+	}
+
+	.box {
+		margin-bottom: 20px;
+		padding: 20px;
+		background-color: lightblue;
+		border: 1px solid #ccc;
+	}
+
+	.large-box {
+		height: 200px;
+		background-color: lightcoral;
+		margin-bottom: 30px;
+	}
+
+	.section {
+		padding: 15px;
+		background-color: #f4f4f4;
+		margin-bottom: 20px;
+	}
+
+	.highlight {
+		background-color: yellow;
+		padding: 10px;
+	}
+</style>
+
+@if (SelectedBrand is not null)
+{
+	<h1>Please scroll to the bottom</h1>
+	<h2 id="hashRef">
+		This is my hash ref
+	</h2>
+
+	<div class="content">
+		<p>This is a paragraph of text to fill space. The purpose of this content is to make sure that we have enough material to scroll through the page.</p>
+
+		<div class="box">
+			<h2>Section 1</h2>
+			<p>Some more content for section 1. This box will create some spacing.</p>
+		</div>
+
+		<div class="box">
+			<h2>Section 2</h2>
+			<p>This section is to add some additional content and make the page longer. The content could be anything, like a random sentence, such as: "The quick brown fox jumps over the lazy dog."</p>
+		</div>
+
+		<div class="large-box"></div>
+
+		<div class="box">
+			<h2>Section 3</h2>
+			<p>Another paragraph to add more length to the page. The more paragraphs you have, the longer the page will be. Here's another random sentence: "Life is like a box of chocolates, you never know what you're gonna get."</p>
+		</div>
+
+		<div class="large-box"></div>
+
+		<div class="box">
+			<h2>Section 4</h2>
+			<p>This section can also have some more content to fill the page. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+		</div>
+
+		<div class="box">
+			<h2>Section 5</h2>
+			<p>Random content continues here, ensuring the scroll effect works well.</p>
+		</div>
+
+		<div class="section">
+			<h3>Subsection 1</h3>
+			<p>This subsection contains a lot of meaningless filler text just to make sure we have enough material to scroll through the page.</p>
+		</div>
+
+		<div class="section">
+			<h3>Subsection 2</h3>
+			<p>Even more filler content goes here. You can keep adding text, images, or any kind of content to increase the length of the page. Here's another random phrase: "To be, or not to be, that is the question."</p>
+		</div>
+
+		<div class="highlight">
+			<p>This is a highlighted section to break up the monotony of text. It will help make the content visually interesting while still contributing to the scroll effect.</p>
+		</div>
+
+		<div class="box">
+			<h2>Section 6</h2>
+			<p>This is the final section in this example. Feel free to add as many sections as you want to further increase the length of the page.</p>
+		</div>
+
+		<div class="large-box"></div>
+
+		<div class="box">
+			<h2>Bonus Section</h2>
+			<p>Bonus content to ensure the page is long enough to require scrolling.</p>
+		</div>
+
+	</div>
+	<NavLink class="btn btn-primary" href="/hash#hashRef">Go to hash ref and observe query params being cleared</NavLink>
+	<div class="btn btn-primary" @onclick="@(() => navigationManager.NavigateToHashRoute("hashRef"))">Go to hash ref and preserve query params</div>
+}
+else
+{
+	<p>Error! Not Found!</p>
+}
+
+@code {
+	[Parameter]
+	public int BrandId { get; set; }
+#nullable enable
+	[Parameter]
+	public int ModelId { get; set; }
+#nullable disable
+	List<Brand> brands = new List<Brand>
+		{
+			new Brand
+			{
+				BrandId = 1,
+				BrandName = "Brand 1",
+				CarModels = new List<Model>
+				{
+					new Model { ModelId = 1, ModelName = "Model X" },
+					new Model { ModelId = 2, ModelName = "Model Y" }
+				}
+			},
+			new Brand
+			{
+				BrandId = 2,
+				BrandName = "Brand 2",
+				CarModels = new List<Model>
+				{
+					new Model { ModelId = 3, ModelName = "Civic" },
+					new Model { ModelId = 4, ModelName = "Accord" }
+				}
+			},
+			new Brand
+			{
+				BrandId = 3,
+				BrandName = "Brand 3",
+				CarModels = new List<Model>
+				{
+					new Model { ModelId = 5, ModelName = "Camry" },
+					new Model { ModelId = 6, ModelName = "Corolla" }
+				}
+			},
+			new Brand
+			{
+				BrandId = 4,
+				BrandName = "Brand 4",
+				CarModels = new List<Model>
+				{
+					new Model { ModelId = 7, ModelName = "Mustang" },
+					new Model { ModelId = 8, ModelName = "F-150" }
+				}
+			},
+			new Brand
+			{
+				BrandId = 5,
+				BrandName = "Brand 5",
+				CarModels = new List<Model>
+				{
+					new Model { ModelId = 9, ModelName = "M3" },
+					new Model { ModelId = 10, ModelName = "X5" }
+				}
+			}
+		};
+
+	Brand SelectedBrand { get; set; }
+
+	protected override void OnParametersSet()
+	{
+		var uri = new Uri(navigationManager.Uri);
+		var queryParameters = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+		if (queryParameters.TryGetValue("brandId", out var brandId))
+			BrandId = Convert.ToInt16(brandId);
+
+		if (queryParameters.TryGetValue("modelId", out var modelId))
+			ModelId = Convert.ToInt16(modelId);
+
+		SelectedBrand = brands.SingleOrDefault(b => b.BrandId == BrandId && b.CarModels.Any(cm => cm.ModelId == ModelId));
+		StateHasChanged();
+	}
+
+	protected override void OnAfterRender(bool firstRender)
+	{
+		if (firstRender)
+		{
+			
+		}
+
+		base.OnAfterRender(firstRender);
+	}
+
+	public class Brand
+	{
+		public int BrandId { get; set; }
+		public string BrandName { get; set; }
+		public List<Model> CarModels { get; set; }
+	}
+
+	public class Model
+	{
+		public int ModelId { get; set; }
+		public string ModelName { get; set; }
+	}
+
+}
