@@ -1,47 +1,16 @@
 ﻿@page "/hash"
 @using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.WebUtilities;
+@using Microsoft.Extensions.Primitives
 @inject NavigationManager navigationManager
-<style>
-	body {
-		font-family: Arial, sans-serif;
-		margin: 0;
-		padding: 0;
-	}
-
-	.content {
-		margin: 20px;
-	}
-
-	.box {
-		margin-bottom: 20px;
-		padding: 20px;
-		background-color: lightblue;
-		border: 1px solid #ccc;
-	}
-
-	.large-box {
-		height: 200px;
-		background-color: lightcoral;
-		margin-bottom: 30px;
-	}
-
-	.section {
-		padding: 15px;
-		background-color: #f4f4f4;
-		margin-bottom: 20px;
-	}
-
-	.highlight {
-		background-color: yellow;
-		padding: 10px;
-	}
-</style>
+@inject IHttpContextAccessor httpAccessor
+@inject IJSRuntime jsRuntime
 
 @if (SelectedBrand is not null)
 {
 	<h1>Please scroll to the bottom</h1>
 	<h2 id="hashRef">
-		This is my hash ref
+		This is my hash ref. <strong>Found @SelectedBrand.BrandName!</strong>
 	</h2>
 
 	<div class="content">
@@ -103,8 +72,10 @@
 		</div>
 
 	</div>
-	<NavLink class="btn btn-primary" href="/hash#hashRef">Go to hash ref and observe query params being cleared</NavLink>
-	<div class="btn btn-primary" @onclick="@(() => navigationManager.NavigateToHashRoute("hashRef"))">Go to hash ref and preserve query params</div>
+	<div id="actionButtons">
+		<NavLink class="btn btn-primary" href="/hash#hashRef">Go to hash ref and observe query params being cleared</NavLink>
+		<div class="btn btn-primary" @onclick="@(() => navigationManager.NavigateToHashRoute("hashRef"))">Go to hash ref and preserve query params</div>
+	</div>
 }
 else
 {
@@ -174,28 +145,24 @@ else
 
 	Brand SelectedBrand { get; set; }
 
-	protected override void OnParametersSet()
-	{
-		var uri = new Uri(navigationManager.Uri);
-		var queryParameters = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-		if (queryParameters.TryGetValue("brandId", out var brandId))
-			BrandId = Convert.ToInt16(brandId);
-
-		if (queryParameters.TryGetValue("modelId", out var modelId))
-			ModelId = Convert.ToInt16(modelId);
-
-		SelectedBrand = brands.SingleOrDefault(b => b.BrandId == BrandId && b.CarModels.Any(cm => cm.ModelId == ModelId));
-		StateHasChanged();
-	}
-
 	protected override void OnAfterRender(bool firstRender)
 	{
 		if (firstRender)
 		{
-			
-		}
+			var uri = new Uri(navigationManager.Uri);
+			var queryStringToParse = string.IsNullOrEmpty(uri.Query) ? uri.Fragment.Substring(uri.Fragment.IndexOf("?")) : uri.Query;
+			var queryParameters = QueryHelpers.ParseQuery(queryStringToParse);
+			if (queryParameters.TryGetValue("brandId", out var brandId))
+				BrandId = Convert.ToInt16(brandId);
 
-		base.OnAfterRender(firstRender);
+			if (queryParameters.TryGetValue("modelId", out var modelId))
+				ModelId = Convert.ToInt16(modelId);
+
+			SelectedBrand = brands.SingleOrDefault(b => b.BrandId == BrandId && b.CarModels.Any(cm => cm.ModelId == ModelId));
+			StateHasChanged();
+
+			base.OnAfterRender(firstRender);
+		}
 	}
 
 	public class Brand
@@ -211,4 +178,20 @@ else
 		public string ModelName { get; set; }
 	}
 
+	#region Proposed Changes
+	//Also NavigateToHashRoute located in Extensions.cs
+
+	public static Dictionary<string, StringValues> NewParseQuery(string? uri)
+	{
+
+		Dictionary<string, StringValues> result = new();
+
+		if (result == null)
+		{
+			return new Dictionary<string, StringValues>();
+		}
+
+		return result;
+	}
+	#endregion
 }

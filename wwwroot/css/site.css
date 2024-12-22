@@ -62,3 +62,42 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.content {
+    margin: 20px;
+}
+
+.box {
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: lightblue;
+    border: 1px solid #ccc;
+}
+
+.large-box {
+    height: 200px;
+    background-color: lightcoral;
+    margin-bottom: 30px;
+}
+
+.section {
+    padding: 15px;
+    background-color: #f4f4f4;
+    margin-bottom: 20px;
+}
+
+.highlight {
+    background-color: yellow;
+    padding: 10px;
+}
+
+    #actionButtons > * {
+        margin: 1em;
+}
+

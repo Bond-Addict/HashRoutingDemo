@@ -11,9 +11,17 @@ namespace HashRoutingDemo
             options ??= new();
 
             var urlSegments = navigationManager.Uri.Split('?');
-            var newUri = options.PreserveParams ?
-                $"{urlSegments[0]}#{hashRoute}?{urlSegments[1]}"
-                : $"{urlSegments[0]}#{hashRoute}";
+            var newUri = "";
+            var hashRouteAlreadyExists = urlSegments.Any(s => s.Contains(hashRoute));
+            if (options.PreserveParams)
+            {
+                newUri = !hashRouteAlreadyExists ? $"{urlSegments[0]}#{hashRoute}?{urlSegments[1]}" : $"{urlSegments[0]}?{urlSegments[1]}";
+            }
+            else
+            {
+                newUri = !hashRouteAlreadyExists ? $"{urlSegments[0]}#{hashRoute}" : urlSegments[0];
+            }
+
             navigationManager.NavigateTo(newUri, options.ForceReload, options.Refresh);
         }
 #nullable disable
